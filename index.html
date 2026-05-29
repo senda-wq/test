@@ -1,111 +1,87 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEO Keyword Checker</title>
+    <title>Guide de Voyage Tunisien - Découvrez le Monde</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>🔍 SEO Keyword Checker</h1>
-            <p>Analyze keyword search volume and Google ranking potential</p>
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🌍 Guide de Voyage Tunisien</h1>
+                <p>Découvrez les meilleures destinations accessibles depuis la Tunisie</p>
+            </div>
         </header>
 
-        <main>
-            <form id="seoForm" class="form-container">
-                <!-- Keywords Input -->
-                <div class="form-group">
-                    <label for="keywords">📝 Enter 5 Keywords (comma-separated)</label>
-                    <textarea 
-                        id="keywords" 
-                        placeholder="e.g. digital marketing, SEO tools, web design, content strategy, social media"
-                        rows="3"
-                        required></textarea>
-                    <small>Enter exactly 5 keywords separated by commas</small>
-                </div>
+        <!-- Search & Filters Section -->
+        <section class="search-filters-section">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-input" 
+                    placeholder="🔍 Rechercher un pays..."
+                    autocomplete="off">
+            </div>
 
-                <!-- Country Selection -->
-                <div class="form-group">
-                    <label for="country">🌍 Select Country</label>
-                    <select id="country" required>
-                        <option value="">-- Select Country --</option>
-                        <option value="US">United States (google.com)</option>
-                        <option value="UK">United Kingdom (google.co.uk)</option>
-                        <option value="FR">France (google.fr)</option>
-                        <option value="TN">Tunisia (google.tn)</option>
-                        <option value="DZ">Algeria (google.dz)</option>
-                        <option value="MA">Morocco (google.co.ma)</option>
-                        <option value="CA">Canada (google.ca)</option>
-                        <option value="DE">Germany (google.de)</option>
-                        <option value="ES">Spain (google.es)</option>
-                        <option value="IT">Italy (google.it)</option>
-                        <option value="BR">Brazil (google.com.br)</option>
-                        <option value="MX">Mexico (google.com.mx)</option>
-                        <option value="IN">India (google.co.in)</option>
-                        <option value="JP">Japan (google.co.jp)</option>
-                        <option value="AU">Australia (google.com.au)</option>
-                    </select>
-                </div>
-
-                <!-- Google Domain -->
-                <div class="form-group">
-                    <label for="googleDomain">🔗 Google Domain</label>
-                    <input 
-                        type="text" 
-                        id="googleDomain" 
-                        placeholder="e.g. google.tn" 
-                        readonly>
-                    <small>Auto-filled based on country selection</small>
-                </div>
-
-                <!-- Website URL -->
-                <div class="form-group">
-                    <label for="websiteUrl">🌐 Website URL to Check</label>
-                    <input 
-                        type="url" 
-                        id="websiteUrl" 
-                        placeholder="e.g. https://example.com"
-                        required>
-                </div>
-
-                <!-- Submit Button -->
-                <button type="submit" class="btn-submit">
-                    ✨ Analyze Keywords
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">
+                    📍 Tous les pays
                 </button>
-            </form>
-
-            <!-- Results Section -->
-            <div id="results" class="results-section" style="display: none;">
-                <h2>📊 Analysis Results</h2>
-                <div id="resultContent"></div>
-                <button onclick="document.getElementById('seoForm').reset(); document.getElementById('results').style.display='none';" class="btn-new">
-                    🔄 Check Another
+                <button class="filter-btn" data-filter="no-visa">
+                    ✓ Sans visa
+                </button>
+                <button class="filter-btn" data-filter="low-budget">
+                    💰 Budget modéré
+                </button>
+                <button class="filter-btn" data-filter="beach">
+                    🏖️ Plages
+                </button>
+                <button class="filter-btn" data-filter="culture">
+                    🏛️ Culture
                 </button>
             </div>
 
-            <!-- Info Section -->
-            <div class="info-section">
-                <h3>ℹ️ About This Tool</h3>
-                <p>
-                    This is a prototype SEO checker interface. To get real data, you would need to integrate with:
-                </p>
-                <ul>
-                    <li><strong>Google Search Console API</strong> - For search volume data</li>
-                    <li><strong>SEO APIs</strong> - SERPStack, SEMrush, Ahrefs for ranking data</li>
-                    <li><strong>Backend Server</strong> - To securely handle API keys</li>
-                </ul>
-                <p><em>Currently showing simulated data for demonstration purposes.</em></p>
+            <div class="sort-box">
+                <label for="sortSelect">Trier par:</label>
+                <select id="sortSelect">
+                    <option value="name">Nom (A-Z)</option>
+                    <option value="visa">Statut visa</option>
+                    <option value="budget">Budget croissant</option>
+                </select>
             </div>
-        </main>
+        </section>
 
-        <footer>
-            <p>🚀 SEO Keyword Checker | Powered by GitHub Pages</p>
-            <p>Repository: <a href="https://github.com/senda-wq/test" target="_blank">senda-wq/test</a></p>
-        </footer>
+        <!-- Countries Grid -->
+        <section class="countries-grid" id="countriesGrid">
+            <!-- Les cartes de pays seront générées ici par JavaScript -->
+        </section>
+
+        <!-- No Results Message -->
+        <div id="noResults" class="no-results" style="display: none;">
+            <p>😔 Aucun pays trouvé. Essayez une autre recherche.</p>
+        </div>
     </div>
 
+    <!-- Modal pour les détails du pays -->
+    <div id="countryModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalBody">
+                <!-- Contenu du pays sera généré ici -->
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2024 Guide de Voyage Tunisien | Voyagez en toute confiance 🌟</p>
+        <p>Repository: <a href="https://github.com/senda-wq/test" target="_blank">senda-wq/test</a></p>
+    </footer>
+
+    <script src="data.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
