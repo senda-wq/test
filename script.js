@@ -1,132 +1,287 @@
-// Country to Google Domain mapping
-const countryToDomain = {
-    'US': 'google.com',
-    'UK': 'google.co.uk',
-    'FR': 'google.fr',
-    'TN': 'google.tn',
-    'DZ': 'google.dz',
-    'MA': 'google.co.ma',
-    'CA': 'google.ca',
-    'DE': 'google.de',
-    'ES': 'google.es',
-    'IT': 'google.it',
-    'BR': 'google.com.br',
-    'MX': 'google.com.mx',
-    'IN': 'google.co.in',
-    'JP': 'google.co.jp',
-    'AU': 'google.com.au'
-};
+// ============================================
+// LOGIQUE PRINCIPALE DE L'APPLICATION
+// ============================================
 
-// Simulated SEO data (in production, this would come from APIs)
-function generateSimulatedData(keyword, country) {
-    // Generate pseudo-random but consistent data based on keyword
-    const keywordHash = keyword.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    
-    return {
-        keyword: keyword,
-        searchVolume: Math.floor((keywordHash * 127) % 50000 + 100),
-        resultsCount: Math.floor((keywordHash * 1234567) % 1000000000 + 1000000),
-        averagePosition: Math.floor((keywordHash * 3) % 100 + 1),
-        competitionLevel: (keywordHash % 3 === 0) ? 'High' : (keywordHash % 3 === 1) ? 'Medium' : 'Low',
-        trend: (keywordHash % 2 === 0) ? '📈 Increasing' : '📉 Decreasing'
-    };
-}
+// Variable globale pour stocker les pays actuellement affichés
+let filteredCountries = [...countriesData];
 
-// Format numbers with commas
-function formatNumber(num) {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
+// ============================================
+// ÉLÉMENTS DU DOM
+// ============================================
 
-// Update Google Domain when country changes
-document.getElementById('country').addEventListener('change', function() {
-    const selectedCountry = this.value;
-    const domain = countryToDomain[selectedCountry] || '';
-    document.getElementById('googleDomain').value = domain;
+const countriesGrid = document.getElementById('countriesGrid');
+const noResults = document.getElementById('noResults');
+const searchInput = document.getElementById('searchInput');
+const filterBtns = document.querySelectorAll('.filter-btn');
+const sortSelect = document.getElementById('sortSelect');
+const modal = document.getElementById('countryModal');
+const closeBtn = document.querySelector('.close');
+const modalBody = document.getElementById('modalBody');
+
+// ============================================
+// INITIALISATION
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    renderCountries();
+    setupEventListeners();
 });
 
-// Form submission handler
-document.getElementById('seoForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Get form values
-    const keywordsInput = document.getElementById('keywords').value;
-    const country = document.getElementById('country').value;
-    const googleDomain = document.getElementById('googleDomain').value;
-    const websiteUrl = document.getElementById('websiteUrl').value;
-    
-    // Parse and validate keywords
-    const keywords = keywordsInput
-        .split(',')
-        .map(k => k.trim())
-        .filter(k => k.length > 0);
-    
-    if (keywords.length !== 5) {
-        alert('❌ Please enter exactly 5 keywords separated by commas.');
-        return;
-    }
-    
-    if (!country) {
-        alert('❌ Please select a country.');
-        return;
-    }
-    
-    if (!websiteUrl) {
-        alert('❌ Please enter a website URL.');
-        return;
-    }
-    
-    // Generate and display results
-    displayResults(keywords, country, googleDomain, websiteUrl);
-});
+// ============================================
+// EVENT LISTENERS
+// ============================================
 
-function displayResults(keywords, country, googleDomain, websiteUrl) {
-    const resultsDiv = document.getElementById('results');
-    let resultHTML = `
-        <div class="analysis-info">
-            <p><strong>Country:</strong> ${country} | <strong>Google Domain:</strong> ${googleDomain}</p>
-            <p><strong>Website:</strong> <a href="${websiteUrl}" target="_blank">${websiteUrl}</a></p>
-            <hr style="margin: 15px 0;">
-        </div>
-    `;
-    
-    keywords.forEach((keyword, index) => {
-        const data = generateSimulatedData(keyword, country);
-        resultHTML += `
-            <div class="keyword-result">
-                <h3>🔑 Keyword ${index + 1}: "${data.keyword}"</h3>
-                <div class="metric">
-                    <span class="metric-label">📊 Average Search Volume:</span>
-                    <span class="metric-value">${formatNumber(data.searchVolume)} searches/month</span>
+function setupEventListeners() {
+    // Recherche en temps réel
+    searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        filterCountries(searchTerm);
+    });
+
+    // Filtres
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filter = this.getAttribute('data-filter');
+            applyFilter(filter);
+        });
+    });
+
+    // Tri
+    sortSelect.addEventListener('change', function(e) {
+        sortCountries(e.target.value);
+        renderCountries();
+    });
+
+    // Modal
+    closeBtn.addEventListener('click', closeModal);
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+}
+
+// ============================================
+// RECHERCHE
+// ============================================
+
+function filterCountries(searchTerm) {
+    if (searchTerm === '') {
+        filteredCountries = [...countriesData];
+    } else {
+        filteredCountries = countriesData.filter(country => 
+            country.name.toLowerCase().includes(searchTerm) ||
+            country.continent.toLowerCase().includes(searchTerm) ||
+            country.cities.some(city => city.toLowerCase().includes(searchTerm)) ||
+            country.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+        );
+    }
+    renderCountries();
+}
+
+// ============================================
+// FILTRES
+// ============================================
+
+function applyFilter(filter) {
+    searchInput.value = ''; // Réinitialiser la recherche
+
+    if (filter === 'all') {
+        filteredCountries = [...countriesData];
+    } else if (filter === 'no-visa') {
+        filteredCountries = countriesData.filter(c => c.visaStatus === 'no-visa');
+    } else if (filter === 'low-budget') {
+        filteredCountries = countriesData.filter(c => c.budget <= 500);
+    } else if (filter === 'beach') {
+        filteredCountries = countriesData.filter(c => c.tags.includes('beach'));
+    } else if (filter === 'culture') {
+        filteredCountries = countriesData.filter(c => c.tags.includes('culture'));
+    }
+
+    renderCountries();
+}
+
+// ============================================
+// TRI
+// ============================================
+
+function sortCountries(sortBy) {
+    if (sortBy === 'name') {
+        filteredCountries.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === 'visa') {
+        filteredCountries.sort((a, b) => {
+            if (a.visaStatus === 'no-visa' && b.visaStatus === 'with-visa') return -1;
+            if (a.visaStatus === 'with-visa' && b.visaStatus === 'no-visa') return 1;
+            return 0;
+        });
+    } else if (sortBy === 'budget') {
+        filteredCountries.sort((a, b) => a.budget - b.budget);
+    }
+}
+
+// ============================================
+// AFFICHAGE DES CARTES
+// ============================================
+
+function renderCountries() {
+    countriesGrid.innerHTML = '';
+
+    if (filteredCountries.length === 0) {
+        noResults.style.display = 'block';
+        return;
+    }
+
+    noResults.style.display = 'none';
+
+    filteredCountries.forEach(country => {
+        const card = createCountryCard(country);
+        countriesGrid.appendChild(card);
+    });
+}
+
+function createCountryCard(country) {
+    const card = document.createElement('div');
+    card.className = 'country-card';
+    card.innerHTML = `
+        <div class="country-image">${country.emoji}</div>
+        <div class="country-card-body">
+            <div class="country-name">${country.name}</div>
+            
+            <div class="visa-badge ${country.visaStatus}">
+                ${country.visaText}
+            </div>
+
+            <div class="country-quick-info">
+                <div class="info-item">
+                    <span>💰</span>
+                    <span>Budget: ${country.budget}€/jour</span>
                 </div>
-                <div class="metric">
-                    <span class="metric-label">🔍 Google Results:</span>
-                    <span class="metric-value">${formatNumber(data.resultsCount)} results</span>
+                <div class="info-item">
+                    <span>🗓️</span>
+                    <span>Meilleure période: ${country.bestPeriod}</span>
                 </div>
-                <div class="metric">
-                    <span class="metric-label">🏆 Average Position on Google:</span>
-                    <span class="metric-value">#${data.averagePosition}</span>
-                </div>
-                <div class="metric">
-                    <span class="metric-label">⚔️ Competition Level:</span>
-                    <span class="metric-value">${data.competitionLevel}</span>
-                </div>
-                <div class="metric">
-                    <span class="metric-label">📈 Trend:</span>
-                    <span class="metric-value">${data.trend}</span>
+                <div class="info-item">
+                    <span>🌎</span>
+                    <span>Continent: ${country.continent}</span>
                 </div>
             </div>
-        `;
-    });
-    
-    resultHTML += `
-        <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #2196F3;">
-            <strong>💡 Note:</strong> This data is simulated for demonstration. To get real data, integrate with Google Search Console API, SERPStack, or similar SEO data providers.
+
+            <div class="country-description">
+                ${country.description}
+            </div>
+
+            <button class="view-more-btn" onclick="openModal(${country.id})">
+                Voir les détails →
+            </button>
         </div>
     `;
-    
-    document.getElementById('resultContent').innerHTML = resultHTML;
-    resultsDiv.style.display = 'block';
-    
-    // Scroll to results
-    resultsDiv.scrollIntoView({ behavior: 'smooth' });
+
+    return card;
 }
+
+// ============================================
+// MODAL - DÉTAILS DU PAYS
+// ============================================
+
+function openModal(countryId) {
+    const country = countriesData.find(c => c.id === countryId);
+    if (!country) return;
+
+    // Générer le contenu du modal
+    modalBody.innerHTML = `
+        <div class="modal-header">
+            ${country.emoji} ${country.name}
+        </div>
+
+        <!-- Visa Info -->
+        <div class="modal-section">
+            <h3>✈️ Informations de Voyage</h3>
+            <div class="modal-info-grid">
+                <div class="modal-info-box">
+                    <strong>Visa</strong>
+                    <span>${country.visaText}</span>
+                </div>
+                <div class="modal-info-box">
+                    <strong>Budget/jour</strong>
+                    <span>${country.budget}€</span>
+                </div>
+                <div class="modal-info-box">
+                    <strong>Continent</strong>
+                    <span>${country.continent}</span>
+                </div>
+                <div class="modal-info-box">
+                    <strong>Meilleure période</strong>
+                    <span>${country.bestPeriod}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transport -->
+        <div class="modal-section">
+            <h3>🚗 Transport</h3>
+            <p>${country.transport}</p>
+        </div>
+
+        <!-- Sécurité -->
+        <div class="modal-section">
+            <h3>🛡️ Sécurité</h3>
+            <p>${country.security}</p>
+        </div>
+
+        <!-- Villes à visiter -->
+        <div class="modal-section">
+            <h3>🏙️ Villes à Visiter</h3>
+            <ul>
+                ${country.cities.map(city => `<li>${city}</li>`).join('')}
+            </ul>
+        </div>
+
+        <!-- Monuments -->
+        <div class="modal-section">
+            <h3>🏛️ Monuments et Lieux Emblématiques</h3>
+            <ul>
+                ${country.monuments.map(monument => `<li>${monument}</li>`).join('')}
+            </ul>
+        </div>
+
+        <!-- Gastronomie -->
+        <div class="modal-section">
+            <h3>🍽️ Plats Locaux à Goûter</h3>
+            <div class="dish-list">
+                ${country.dishes.map(dish => `<div class="dish-item">${dish}</div>`).join('')}
+            </div>
+        </div>
+
+        <!-- Activités -->
+        <div class="modal-section">
+            <h3>🎯 Idées d'Activités & Expériences</h3>
+            <div class="activity-list">
+                ${country.activities.map(activity => `<div class="activity-item">${activity}</div>`).join('')}
+            </div>
+        </div>
+
+        <!-- Conseil pratique -->
+        <div class="modal-section" style="background: #FFF3CD; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary-color);">
+            <h3 style="margin-top: 0;">💡 Conseil Pratique</h3>
+            <p>Consultez les dernières recommandations du gouvernement tunisien avant de voyager. Assurez-vous que votre passeport est valide pour au moins 6 mois après votre voyage.</p>
+        </div>
+    `;
+
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Fermer modal sur Esc
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeModal();
+    }
+});
