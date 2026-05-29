@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO Keyword Checker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 SEO Keyword Checker</h1>
+            <p>Analyze keyword search volume and Google ranking potential</p>
+        </header>
+
+        <main>
+            <form id="seoForm" class="form-container">
+                <!-- Keywords Input -->
+                <div class="form-group">
+                    <label for="keywords">📝 Enter 5 Keywords (comma-separated)</label>
+                    <textarea 
+                        id="keywords" 
+                        placeholder="e.g. digital marketing, SEO tools, web design, content strategy, social media"
+                        rows="3"
+                        required></textarea>
+                    <small>Enter exactly 5 keywords separated by commas</small>
+                </div>
+
+                <!-- Country Selection -->
+                <div class="form-group">
+                    <label for="country">🌍 Select Country</label>
+                    <select id="country" required>
+                        <option value="">-- Select Country --</option>
+                        <option value="US">United States (google.com)</option>
+                        <option value="UK">United Kingdom (google.co.uk)</option>
+                        <option value="FR">France (google.fr)</option>
+                        <option value="TN">Tunisia (google.tn)</option>
+                        <option value="DZ">Algeria (google.dz)</option>
+                        <option value="MA">Morocco (google.co.ma)</option>
+                        <option value="CA">Canada (google.ca)</option>
+                        <option value="DE">Germany (google.de)</option>
+                        <option value="ES">Spain (google.es)</option>
+                        <option value="IT">Italy (google.it)</option>
+                        <option value="BR">Brazil (google.com.br)</option>
+                        <option value="MX">Mexico (google.com.mx)</option>
+                        <option value="IN">India (google.co.in)</option>
+                        <option value="JP">Japan (google.co.jp)</option>
+                        <option value="AU">Australia (google.com.au)</option>
+                    </select>
+                </div>
+
+                <!-- Google Domain -->
+                <div class="form-group">
+                    <label for="googleDomain">🔗 Google Domain</label>
+                    <input 
+                        type="text" 
+                        id="googleDomain" 
+                        placeholder="e.g. google.tn" 
+                        readonly>
+                    <small>Auto-filled based on country selection</small>
+                </div>
+
+                <!-- Website URL -->
+                <div class="form-group">
+                    <label for="websiteUrl">🌐 Website URL to Check</label>
+                    <input 
+                        type="url" 
+                        id="websiteUrl" 
+                        placeholder="e.g. https://example.com"
+                        required>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-submit">
+                    ✨ Analyze Keywords
+                </button>
+            </form>
+
+            <!-- Results Section -->
+            <div id="results" class="results-section" style="display: none;">
+                <h2>📊 Analysis Results</h2>
+                <div id="resultContent"></div>
+                <button onclick="document.getElementById('seoForm').reset(); document.getElementById('results').style.display='none';" class="btn-new">
+                    🔄 Check Another
+                </button>
+            </div>
+
+            <!-- Info Section -->
+            <div class="info-section">
+                <h3>ℹ️ About This Tool</h3>
+                <p>
+                    This is a prototype SEO checker interface. To get real data, you would need to integrate with:
+                </p>
+                <ul>
+                    <li><strong>Google Search Console API</strong> - For search volume data</li>
+                    <li><strong>SEO APIs</strong> - SERPStack, SEMrush, Ahrefs for ranking data</li>
+                    <li><strong>Backend Server</strong> - To securely handle API keys</li>
+                </ul>
+                <p><em>Currently showing simulated data for demonstration purposes.</em></p>
+            </div>
+        </main>
+
+        <footer>
+            <p>🚀 SEO Keyword Checker | Powered by GitHub Pages</p>
+            <p>Repository: <a href="https://github.com/senda-wq/test" target="_blank">senda-wq/test</a></p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
